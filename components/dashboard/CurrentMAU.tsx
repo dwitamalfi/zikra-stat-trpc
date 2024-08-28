@@ -28,13 +28,6 @@ export default function CurrentMAU() {
     labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
       {
-        label: 'Sales 2023',
-        data: [65, 59, 80, 81, 56, 55, 40],
-        fill: false,
-        borderColor: 'rgba(75,192,192,1)',
-        tension: 0.1,
-      },
-      {
         label: 'Sales 2024',
         data: [75, 69, 90, 91, 66, 65, 50],
         fill: false,
@@ -75,7 +68,6 @@ export default function CurrentMAU() {
       <div>
         <Line data={data} options={options} />
       </div>
-      <span className="text-xl">Active User on Today</span>
     </div>
   );
 }

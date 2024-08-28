@@ -71,7 +71,6 @@ export default function CurrentWAU() {
       <div>
         <Line data={data} options={options} />
       </div>
-      <span className="text-xl">Active User on Today</span>
     </div>
   );
 }
