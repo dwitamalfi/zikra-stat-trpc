@@ -14,6 +14,8 @@ import TotalCurrentUser from "../../../components/dashboard/TotalCurrentUser";
 import UserGrowth from "../../../components/dashboard/UserGrowth";
 import FeatureUsage from "../../../components/dashboard/FeatureUsage";
 import CurrentDAU from "../../../components/dashboard/CurrentDAU";
+import CurrentMAU from "../../../components/dashboard/CurrentMAU";
+import CurrentWAU from "../../../components/dashboard/CurrentWAU";
 
 // Register Chart.js components
 ChartJS.register(
@@ -26,31 +28,7 @@ ChartJS.register(
 );
 
 export default function Dashboard() {
-  const data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
-    datasets: [
-      {
-        label: "Sales",
-        data: [30, 20, 50, 60, 70, 90, 100],
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-        borderColor: "rgba(75, 192, 192, 1)",
-        borderWidth: 1,
-      },
-    ],
-  };
 
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        position: "top" as const,
-      },
-      title: {
-        display: true,
-        text: "Sales Chart",
-      },
-    },
-  };
   return (
     <>
       <div className="flex">
@@ -73,16 +51,10 @@ export default function Dashboard() {
               <CurrentDAU />
             </div>
             <div className="flex-1 border-right-here p-5">
-              <CurrentDAU />
+              <CurrentWAU/>
             </div>
             <div className="flex-1 border-right-here p-5">
-              <CurrentDAU />
-            </div>
-            <div className="flex-1 p-5 border-right-here">
-              <Bar data={data} options={options} />
-            </div>
-            <div className="flex-1 p-5">
-              <Bar data={data} options={options} />
+            <CurrentMAU />
             </div>
           </div>
           <div className="gradient-fadeout-hr"></div>

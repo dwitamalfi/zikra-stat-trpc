@@ -23,18 +23,23 @@ ChartJS.register(
   Legend
 );
 
-export default function CurrentDAU() {
+export default function CurrentMAU() {
   const data = {
-    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
     datasets: [
       {
-        label: 'DAU (Daily Active Users)',
-        data: [1200, 1500, 1100, 1600, 1700, 1400, 1300],
+        label: 'Sales 2023',
+        data: [65, 59, 80, 81, 56, 55, 40],
         fill: false,
         borderColor: 'rgba(75,192,192,1)',
         tension: 0.1,
-        pointBackgroundColor: 'rgba(75,192,192,1)',
-        pointBorderColor: 'rgba(75,192,192,1)',
+      },
+      {
+        label: 'Sales 2024',
+        data: [75, 69, 90, 91, 66, 65, 50],
+        fill: false,
+        borderColor: 'rgba(153, 102, 255, 1)',
+        tension: 0.1,
       },
     ],
   };
@@ -47,22 +52,21 @@ export default function CurrentDAU() {
       },
       title: {
         display: true,
-        text: 'Daily Active Users Over the Week',
+        text: 'Sales Over Time',
       },
     },
     scales: {
       x: {
         title: {
           display: true,
-          text: 'Day of the Week',
+          text: 'Months',
         },
       },
       y: {
         title: {
           display: true,
-          text: 'Number of Users',
+          text: 'Sales',
         },
-        beginAtZero: true,
       },
     },
   };
