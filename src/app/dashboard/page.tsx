@@ -29,6 +29,10 @@ ChartJS.register(
 
 export default function Dashboard() {
 
+  // const atlte = athlete();
+  // console.log("atlet",atlte);
+  
+
   return (
     <>
       <div className="flex">

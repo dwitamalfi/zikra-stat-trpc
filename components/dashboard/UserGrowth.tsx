@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { trpc } from "../../utils/trpc";
 
 // Register Chart.js components
 ChartJS.register(
@@ -21,12 +22,38 @@ ChartJS.register(
   Legend
 );
 export default function UserGrowth() {
-  const data = {
-    labels: ["January", "February", "March", "April", "May", "June", "July"],
+  const { data, isLoading, isFetching } = trpc.getUserGrowth.useQuery();
+
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  let dataLabel;
+  
+  dataLabel = data?.data.user.map((item)=>{
+    return item.bulan
+  })
+
+  let dataUser = data?.data.user.map((item)=>{return Number(item.count)})
+  
+  const datax = {
+    labels: dataLabel?.map((item)=>{
+      return monthNames[item-1]
+    }),
     datasets: [
       {
         label: "User",
-        data: [30, 20, 50, 60, 70, 90, 100],
+        data: dataUser,
         backgroundColor: "rgba(75, 192, 192, 0.6)",
         borderColor: "rgba(75, 192, 192, 1)",
         borderWidth: 1,
@@ -48,7 +75,7 @@ export default function UserGrowth() {
   };
   return (
     <>
-      <Bar data={data} options={options} />
+      <Bar data={datax} options={options} />
     </>
   );
 }
