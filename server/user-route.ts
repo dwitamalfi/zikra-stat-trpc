@@ -1,5 +1,5 @@
 import { createUserSchema, filterQuery } from './user-schema';
-import { getTotalUser, getUserGrowth, getUserList } from './user-controller';
+import { getAllActivity, getDailyUser, getTotalUser, getUserGrowth, getUserList } from './user-controller';
 import { t } from './../utils/trpc-server';
 
 const userRouter = t.router({
@@ -10,6 +10,11 @@ const userRouter = t.router({
     .query(()=>getTotalUser()),
    getUserGrowth: t.procedure
     .query(()=>getUserGrowth()),
+    getDailyUser: t.procedure
+    .query(()=>getDailyUser()),
+    getAllActivity: t.procedure
+    .input(filterQuery)
+    .query(({input})=> getAllActivity({ filterQuery: input })),
 });
 
 export default userRouter;

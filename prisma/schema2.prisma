@@ -1,0 +1,26 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client2"
+}
+
+datasource db2 {
+  provider = "postgresql"
+  url      = env("DATABASE2_URL")
+}
+
+model trx_user_activities {
+  id             String    @id @db2.VarChar
+  user_id        String?   @db2.VarChar
+  date           DateTime? @db2.Date
+  page           String?   @db2.VarChar
+  action         String?   @db2.VarChar
+  created_at     DateTime? @db2.Timestamp(6)
+  updated_at     DateTime? @db2.Timestamp(6)
+  email          String?   @db2.VarChar
+  reference_id   String?   @db2.VarChar
+  reference_type String?   @db2.VarChar
+
+  @@index([date], map: "trx_user_activities_date_index")
+  @@index([user_id, date], map: "trx_user_activities_user_id_date_index")
+  @@index([user_id], map: "trx_user_activities_user_id_index")
+}

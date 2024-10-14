@@ -1,0 +1,868 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client1"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model midtrans_log_transactions {
+  id                  String    @id(map: "midtrans_log_transactions_pk") @db.VarChar
+  approval_code       String?   @db.VarChar
+  bank                String?   @db.VarChar
+  finish_redirect_url String?   @db.VarChar
+  fraud_status        String?   @db.VarChar
+  gross_amount        BigInt?   @default(0)
+  masked_card         String?   @db.VarChar
+  order_id            String?   @db.VarChar
+  payment_type        String?   @db.VarChar
+  status_code         String?   @db.VarChar
+  status_message      String?   @db.VarChar
+  transaction_id      String?   @db.VarChar
+  transaction_status  String?   @db.VarChar
+  transaction_time    String?   @db.VarChar
+  created_at          DateTime? @db.Timestamp(6)
+  updated_at          DateTime? @db.Timestamp(6)
+}
+
+model midtrans_payment_list {
+  id         String    @unique(map: "newtable_unique") @db.VarChar
+  app_name   String?   @db.VarChar
+  app_code   String?   @db.VarChar
+  app_icon   String?   @db.VarChar
+  deleted    Int?      @default(0) @db.SmallInt
+  created_at DateTime? @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+}
+
+model midtrans_trx_request_payments {
+  id                   String                @id(map: "midtrans_trx_request_payments_pk") @db.VarChar
+  midtrans_order_id    String?               @db.VarChar
+  order_id             String?               @db.VarChar
+  gross_amount         BigInt?               @default(0)
+  status               Int?                  @default(0) @db.SmallInt
+  created_at           DateTime?             @db.Timestamp(6)
+  updated_at           DateTime?             @db.Timestamp(6)
+  customer_id          String?               @db.VarChar
+  redirect_url         String?               @db.VarChar
+  midtrans_token_id    String?               @db.VarChar
+  mst_user             mst_user?             @relation(fields: [customer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "midtrans_trx_request_payments_sys_users_id_fk")
+  mst_infaq_admissions mst_infaq_admissions? @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "midtrans_trx_request_payments_trx_orders_id_fk")
+}
+
+model mst_background {
+  id              String    @id @db.VarChar(100)
+  background_name String?   @db.VarChar(100)
+  created_at      DateTime? @db.Timestamp(6)
+  updated_at      DateTime? @db.Timestamp(6)
+  background_svg  String?   @db.VarChar(100)
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mst_badges {
+  id              String            @id(map: "mst_badges_pk") @db.VarChar(100)
+  mission_id      String?           @db.VarChar(100)
+  name            String            @default("NOT DEFINED") @db.VarChar(100)
+  description     String            @default("NOT DEFINED")
+  target          Int               @default(1)
+  image_url       String?           @db.VarChar(255)
+  created_at      DateTime?         @db.Timestamp(6)
+  updated_at      DateTime?         @db.Timestamp(6)
+  deleted         Int?              @default(0) @db.SmallInt
+  target_category String            @default("NOT DEFINED") @db.VarChar(50)
+  mst_missions    mst_missions?     @relation(fields: [mission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "mst_badges_mst_mission_id_fk")
+  prd_user_badges prd_user_badges[]
+}
+
+model mst_category {
+  id                        String                      @id @db.VarChar(100)
+  category_name             String?                     @db.VarChar(150)
+  category_type             String?                     @db.VarChar(10)
+  category_icon_name        String?                     @db.VarChar(150)
+  created_at                DateTime?                   @db.Timestamp(6)
+  updated_at                DateTime?                   @db.Timestamp(6)
+  deleted                   Int?                        @default(dbgenerated("(0)::smallint")) @db.SmallInt
+  background_name           String?                     @db.VarChar
+  description               String?
+  is_highlight              Boolean?
+  prd_user_dzikir_favorites prd_user_dzikir_favorites[]
+}
+
+model mst_infaq_admissions {
+  id                            String                          @id(map: "mst_infaq_admissions_pk") @db.VarChar(100)
+  infaq_program_id              String                          @db.VarChar(100)
+  user_id                       String                          @db.VarChar(100)
+  is_anonymous                  Int?                            @default(0) @db.SmallInt
+  transaction_number            String?                         @db.VarChar(255)
+  admission_date                DateTime                        @db.Timestamp(6)
+  description                   String?
+  amount                        Decimal?                        @db.Decimal
+  status                        Int?                            @default(0) @db.SmallInt
+  created_at                    DateTime?                       @db.Timestamp(6)
+  updated_at                    DateTime?                       @db.Timestamp(6)
+  deleted                       Int?                            @default(0) @db.SmallInt
+  payment_type                  String?                         @db.VarChar
+  midtrans_trx_request_payments midtrans_trx_request_payments[]
+  mst_infaq_programs            mst_infaq_programs              @relation(fields: [infaq_program_id], references: [id], onDelete: NoAction, map: "mst_infaq_admissions_mst_infaq_program_id_fk")
+  mst_user                      mst_user                        @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "mst_infaq_admissions_mst_user_id_fk")
+}
+
+model mst_infaq_programs {
+  id                               String                             @id(map: "mst_infaq_programs_pk") @db.VarChar(100)
+  program_name                     String                             @db.VarChar(100)
+  start_date                       DateTime                           @db.Date
+  end_date                         DateTime                           @db.Date
+  donation_target                  Decimal?                           @db.Decimal
+  media                            String?                            @db.VarChar(255)
+  status                           Int?                               @db.SmallInt
+  fundraiser                       String?                            @db.VarChar(100)
+  story_thumbnail                  String?                            @db.VarChar(255)
+  story_description                String?
+  start_time                       String?                            @db.VarChar(5)
+  end_time                         String?                            @db.VarChar(5)
+  repeat                           String?                            @db.VarChar(50)
+  created_at                       DateTime?                          @db.Timestamp(6)
+  updated_at                       DateTime?                          @db.Timestamp(6)
+  deleted                          Int?                               @default(0) @db.SmallInt
+  is_patronage                     Int?                               @default(0) @db.SmallInt
+  mst_infaq_admissions             mst_infaq_admissions[]
+  mst_infaq_usages                 mst_infaq_usages[]
+  prd_user_infaq_program_reminders prd_user_infaq_program_reminders[]
+}
+
+model mst_infaq_usages {
+  id                 String             @id(map: "mst_infaq_usages_pk") @db.VarChar(100)
+  infaq_program_id   String             @db.VarChar(100)
+  usage_type         String             @db.VarChar(50)
+  usage_date         DateTime           @db.Date
+  amount             Decimal            @db.Decimal
+  description        String?
+  status             Int                @db.SmallInt
+  story_title        String?            @db.VarChar(255)
+  story_thumbnail    String?            @db.VarChar(255)
+  story_description  String?
+  created_at         DateTime?          @db.Timestamp(6)
+  updated_at         DateTime?          @db.Timestamp(6)
+  deleted            Int?               @default(0) @db.SmallInt
+  mst_infaq_programs mst_infaq_programs @relation(fields: [infaq_program_id], references: [id], onDelete: NoAction, map: "mst_infaq_usages_mst_infaq_program_id_fk")
+}
+
+model mst_mission_checkpoints {
+  id           String        @id(map: "mst_mission_checkpoint_pk") @db.VarChar(100)
+  checkpoint   Int?          @db.SmallInt
+  mission_id   String?       @db.VarChar(100)
+  point        Int?          @default(0)
+  created_at   DateTime?     @db.Timestamp(6)
+  updated_at   DateTime?     @db.Timestamp(6)
+  mst_missions mst_missions? @relation(fields: [mission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mst_mission_checkpoint_fk")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mst_mission_detail_rewards {
+  id                  String               @id(map: "mst_mission_detail_rewards_pk") @db.VarChar(100)
+  mission_detail_id   String?              @db.VarChar(100)
+  value               Int?                 @default(1)
+  type                String?              @default("XP") @db.VarChar(50)
+  created_at          DateTime?            @db.Timestamp(6)
+  updated_at          DateTime?            @db.Timestamp(6)
+  mst_mission_details mst_mission_details? @relation(fields: [mission_detail_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "mst_mission_detail_rewards_mst_mission_detail_id_fk")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mst_mission_details {
+  id                               String                             @id(map: "mst_mission_details_pk") @db.VarChar(100)
+  mission_id                       String?                            @db.VarChar(100)
+  name                             String?                            @db.VarChar
+  target                           Int?                               @default(0)
+  unit                             String?                            @db.VarChar
+  created_at                       DateTime?                          @db.Timestamp(6)
+  updated_at                       DateTime?                          @db.Timestamp(6)
+  type                             String?                            @db.VarChar(100)
+  dzikir_id                        String?                            @db.VarChar(100)
+  surah                            String?                            @db.VarChar(100)
+  description                      String?
+  infaq_id                         String?                            @db.VarChar(100)
+  mst_mission_detail_rewards       mst_mission_detail_rewards[]
+  mst_missions                     mst_missions?                      @relation(fields: [mission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "mst_mission_details_mst_missions_id_fk")
+  prd_dzikir                       prd_dzikir?                        @relation(fields: [dzikir_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mst_mission_details_prd_dzikir_id_fk")
+  prd_tracker_user_mission_details prd_tracker_user_mission_details[]
+  prd_user_history_rewards         prd_user_history_rewards[]
+}
+
+model mst_mission_series {
+  id           String        @id(map: "mst_mission_series_pk") @db.VarChar(100)
+  mission_id   String?       @db.VarChar(100)
+  title        String?       @db.VarChar
+  description  String?       @db.VarChar
+  created_at   DateTime?     @db.Timestamp(6)
+  updated_at   DateTime?     @db.Timestamp(6)
+  order        Int?          @db.SmallInt
+  mst_missions mst_missions? @relation(fields: [mission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mst_mission_series_fk")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model mst_missions {
+  id                        String                      @id(map: "mst_missions_pk") @db.VarChar(100)
+  name                      String?                     @db.VarChar
+  total_day                 Int?                        @default(0)
+  description               String?
+  status                    Int?                        @default(dbgenerated("(1)::smallint")) @db.SmallInt
+  deleted                   Boolean?                    @default(false)
+  created_at                DateTime?                   @db.Timestamp(6)
+  updated_at                DateTime?                   @db.Timestamp(6)
+  type                      Int?                        @db.SmallInt
+  benefit                   String?                     @db.VarChar
+  color                     String?                     @db.VarChar
+  registration_start_date   DateTime?                   @db.Date
+  registration_end_date     DateTime?                   @db.Date
+  daily_point               Int?                        @default(5)
+  event_start_date          DateTime?                   @db.Date
+  event_end_date            DateTime?                   @db.Date
+  image_url                 String?                     @db.VarChar(255)
+  activation_date           DateTime?                   @db.Timestamp(6)
+  mission_type              String?                     @db.VarChar(100)
+  banner                    String?                     @db.VarChar
+  mst_badges                mst_badges[]
+  mst_mission_checkpoints   mst_mission_checkpoints[]
+  mst_mission_details       mst_mission_details[]
+  mst_mission_series        mst_mission_series[]
+  prd_tracker_user_missions prd_tracker_user_missions[]
+  prd_user_history_points   prd_user_history_points[]
+  prd_user_history_rewards  prd_user_history_rewards[]
+  prd_user_missions         prd_user_missions[]
+}
+
+model mst_mobile_update_details {
+  id                 String              @id(map: "mst_mobile_update_details_pk") @db.VarChar(100)
+  mobile_update_id   String?             @db.VarChar(100)
+  description        String?
+  created_at         DateTime?           @db.Timestamp(6)
+  updated_at         DateTime?           @db.Timestamp(6)
+  mst_mobile_updates mst_mobile_updates? @relation(fields: [mobile_update_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mst_mobile_update_details_mst_mobile_updates_id_fk")
+}
+
+model mst_mobile_updates {
+  id                        String                      @id(map: "mst_mobile_updates_pk") @db.VarChar(100)
+  version                   String?                     @db.VarChar(100)
+  order                     Int?
+  created_at                DateTime?                   @db.Timestamp(6)
+  updated_at                DateTime?                   @db.Timestamp(6)
+  deleted                   Int?                        @default(0) @db.SmallInt
+  mst_mobile_update_details mst_mobile_update_details[]
+}
+
+model mst_notification_contents {
+  id                String            @id(map: "mst_notification_contents_pk") @db.VarChar(100)
+  notification_id   String            @db.VarChar(100)
+  name              String?           @db.VarChar(150)
+  caption           String?
+  date              DateTime?         @db.Date
+  created_at        DateTime?         @db.Timestamp(6)
+  updated_at        DateTime?         @db.Timestamp(6)
+  deleted           Int?              @default(0) @db.SmallInt
+  mst_notifications mst_notifications @relation(fields: [notification_id], references: [id], onDelete: NoAction, map: "mst_notification_contents_mst_notification_id_fk")
+}
+
+model mst_notification_local_location_pray_schedules {
+  id                               String                            @id(map: "mst_notification_local_location_pray_schedules_pk") @db.VarChar(100)
+  notification_local_location_id   String?                           @db.VarChar(100)
+  date                             DateTime?                         @db.Date
+  imsak                            String?                           @db.VarChar(5)
+  subuh                            String?                           @db.VarChar(5)
+  terbit                           String?                           @db.VarChar(5)
+  dhuha                            String?                           @db.VarChar(5)
+  dzuhur                           String?                           @db.VarChar(5)
+  ashar                            String?                           @db.VarChar(5)
+  magrib                           String?                           @db.VarChar(5)
+  isya                             String?                           @db.VarChar(5)
+  created_at                       DateTime?                         @db.Timestamp(6)
+  updated_at                       DateTime?                         @db.Timestamp(6)
+  deleted                          Int?                              @default(0) @db.SmallInt
+  mst_notification_local_locations mst_notification_local_locations? @relation(fields: [notification_local_location_id], references: [id], onDelete: NoAction, map: "mst_notification_local_location_pray_schedules_mst_notification")
+}
+
+model mst_notification_local_locations {
+  id                                             String                                           @id(map: "mst_notification_local_locations_pk") @db.VarChar(100)
+  shadow_id                                      BigInt?                                          @unique
+  location                                       String?                                          @db.VarChar(150)
+  created_at                                     DateTime?                                        @db.Timestamp(6)
+  updated_at                                     DateTime?                                        @db.Timestamp(6)
+  deleted                                        Int?                                             @default(0) @db.SmallInt
+  mst_notification_local_location_pray_schedules mst_notification_local_location_pray_schedules[]
+}
+
+model mst_notifications {
+  id                        String                      @id(map: "mst_notifications_pk") @db.VarChar(100)
+  name                      String?                     @db.VarChar(100)
+  caption                   String?
+  type                      String?                     @db.VarChar(50)
+  media                     String?                     @db.VarChar(255)
+  start_date                DateTime?                   @db.Date
+  end_date                  DateTime?                   @db.Date
+  time                      String?                     @db.VarChar(5)
+  menu                      String?                     @db.VarChar(50)
+  link                      String?                     @db.VarChar(100)
+  repeat                    String?                     @db.VarChar(50)
+  created_at                DateTime?                   @db.Timestamp(6)
+  updated_at                DateTime?                   @db.Timestamp(6)
+  deleted                   Int?                        @default(0) @db.SmallInt
+  subtype                   String?                     @db.VarChar(50)
+  based_on_time             String?                     @db.VarChar(25)
+  mst_notification_contents mst_notification_contents[]
+  notification_send_logs    notification_send_logs[]
+}
+
+model mst_quran_ayah {
+  id                                                        Int                             @id(map: "mst_quran_ayah_pk") @unique(map: "mst_quran_ayah_id_uindex") @db.SmallInt
+  surah                                                     Int?                            @db.SmallInt
+  ayah                                                      Int?                            @db.SmallInt
+  arabic                                                    String?
+  latin                                                     String?
+  translate                                                 String?
+  page                                                      Int?                            @db.SmallInt
+  juz                                                       Int?                            @db.SmallInt
+  mst_quran_interpretations                                 mst_quran_interpretations[]
+  mst_quran_recites                                         mst_quran_recites[]
+  mst_user_mst_user_last_seen_quran_ayah_idTomst_quran_ayah mst_user[]                      @relation("mst_user_last_seen_quran_ayah_idTomst_quran_ayah")
+  mst_user_mst_user_marked_quran_ayah_idTomst_quran_ayah    mst_user[]                      @relation("mst_user_marked_quran_ayah_idTomst_quran_ayah")
+  prd_user_quran_ayah_favorites                             prd_user_quran_ayah_favorites[]
+  prd_user_quran_ayah_marks                                 prd_user_quran_ayah_marks[]
+}
+
+model mst_quran_interpretations {
+  id             String          @id(map: "mst_quran_interpretations_pk") @db.VarChar(100)
+  quran_ayah_id  Int?            @db.SmallInt
+  reference      String?         @db.VarChar(100)
+  interpretation String?
+  created_at     DateTime?       @db.Timestamp(6)
+  updated_at     DateTime?       @db.Timestamp(6)
+  deleted        Int?            @default(0) @db.SmallInt
+  mst_quran_ayah mst_quran_ayah? @relation(fields: [quran_ayah_id], references: [id], onDelete: NoAction, map: "mst_quran_interpretations_mst_quran_ayah_id_fk")
+}
+
+model mst_quran_reciters {
+  id                String              @id(map: "mst_quran_reciters_pk") @db.VarChar(100)
+  name              String?             @db.VarChar(100)
+  image_url         String?             @db.VarChar(255)
+  created_at        DateTime?           @db.Timestamp(6)
+  updated_at        DateTime?           @db.Timestamp(6)
+  deleted           Int?                @default(0) @db.SmallInt
+  mst_quran_recites mst_quran_recites[]
+}
+
+model mst_quran_recites {
+  id                 String              @id(map: "mst_quran_recites_pk") @db.VarChar(100)
+  quran_reciter_id   String?             @db.VarChar(100)
+  quran_ayah_id      Int?                @db.SmallInt
+  audio_url          String?             @db.VarChar(255)
+  created_at         DateTime?           @db.Timestamp(6)
+  updated_at         DateTime?           @db.Timestamp(6)
+  deleted            Int?                @default(0) @db.SmallInt
+  mst_quran_ayah     mst_quran_ayah?     @relation(fields: [quran_ayah_id], references: [id], onDelete: NoAction, map: "mst_quran_recites_mst_quran_ayah_id_fk")
+  mst_quran_reciters mst_quran_reciters? @relation(fields: [quran_reciter_id], references: [id], onDelete: NoAction, map: "mst_quran_recites_mst_quran_reciters_id_fk")
+}
+
+model mst_quran_surah {
+  id                            Int                             @id(map: "quran_surah_pkey")
+  surah_name                    String?                         @unique(map: "idx_surah_name")
+  arabic                        String?
+  translate                     String?
+  location                      String?
+  num_ayah                      Int?
+  prd_user_quran_ayah_favorites prd_user_quran_ayah_favorites[]
+  prd_user_quran_ayah_marks     prd_user_quran_ayah_marks[]
+}
+
+model mst_tier_rewards {
+  id         String     @id(map: "mst_tier_detail_rewards_pk") @db.VarChar(100)
+  tier_id    String?    @default("NULL::character varying") @db.VarChar(100)
+  value      Int?
+  type       String?    @db.VarChar(100)
+  created_at DateTime?  @db.Timestamp(6)
+  updated_at DateTime?  @db.Timestamp(6)
+  mst_tiers  mst_tiers? @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mst_tier_detail_rewards_mst_tiers_id_fk")
+}
+
+model mst_tiers {
+  id                       String                     @id(map: "mst_tiers_pk") @db.VarChar(100)
+  name                     String?                    @db.VarChar(100)
+  image_url                String?                    @db.VarChar(255)
+  order                    Int?
+  max_user                 Int?
+  promote_limit            Int?
+  demote_limit             Int?
+  created_at               DateTime?                  @db.Timestamp(6)
+  updated_at               DateTime?                  @db.Timestamp(6)
+  deleted                  Int?                       @default(0) @db.SmallInt
+  color                    String?                    @default("NULL::character varying") @db.VarChar(255)
+  share_image_url          String?                    @db.VarChar
+  mst_tier_rewards         mst_tier_rewards[]
+  prd_tier_rooms           prd_tier_rooms[]
+  prd_user_history_rewards prd_user_history_rewards[]
+}
+
+model mst_user {
+  id                                                              String                             @id @db.VarChar(100)
+  username                                                        String?                            @db.VarChar(100)
+  password                                                        String?                            @db.VarChar(100)
+  created_at                                                      DateTime?                          @db.Timestamp(6)
+  updated_at                                                      DateTime?                          @db.Timestamp(6)
+  deleted                                                         Int?                               @default(0) @db.SmallInt
+  name                                                            String?                            @db.VarChar(100)
+  quran_fluent                                                    Int?                               @db.SmallInt
+  role                                                            String?                            @default("user") @db.VarChar(20)
+  email                                                           String?                            @db.VarChar(100)
+  photo_url                                                       String?                            @db.VarChar(255)
+  uid                                                             String?                            @db.VarChar(100)
+  total_point                                                     Int?                               @default(0)
+  is_anonymous                                                    Int?                               @default(0) @db.SmallInt
+  tag_id                                                          String?                            @db.VarChar(6)
+  customize_photo_url                                             String?                            @db.VarChar
+  birthplace                                                      String?                            @db.VarChar(100)
+  birthdate                                                       DateTime?                          @db.Date
+  gender                                                          Int?                               @db.SmallInt
+  address                                                         String?                            @db.VarChar(255)
+  phone_number                                                    String?                            @db.VarChar(20)
+  mazhab                                                          String?                            @db.VarChar(50)
+  device_type                                                     String?                            @db.VarChar(20)
+  total_dziko                                                     Int?                               @default(0)
+  deleted_at                                                      DateTime?                          @db.Timestamp(6)
+  marked_quran_ayah_id                                            Int?                               @db.SmallInt
+  last_seen_quran_ayah_id                                         Int?                               @db.SmallInt
+  identity_type                                                   String?                            @db.VarChar(50)
+  identity_number                                                 String?                            @db.VarChar(100)
+  midtrans_trx_request_payments                                   midtrans_trx_request_payments[]
+  mst_infaq_admissions                                            mst_infaq_admissions[]
+  mst_quran_ayah_mst_user_last_seen_quran_ayah_idTomst_quran_ayah mst_quran_ayah?                    @relation("mst_user_last_seen_quran_ayah_idTomst_quran_ayah", fields: [last_seen_quran_ayah_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mst_user_last_seen_quran_ayah_id_fk")
+  mst_quran_ayah_mst_user_marked_quran_ayah_idTomst_quran_ayah    mst_quran_ayah?                    @relation("mst_user_marked_quran_ayah_idTomst_quran_ayah", fields: [marked_quran_ayah_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "mst_user_marked_quran_ayah_id_fk")
+  prd_tracker_user_missions                                       prd_tracker_user_missions[]
+  prd_user_badges                                                 prd_user_badges[]
+  prd_user_doa_favorites                                          prd_user_doa_favorites[]
+  prd_user_dzikir_favorites                                       prd_user_dzikir_favorites[]
+  prd_user_goals                                                  prd_user_goals[]
+  prd_user_histories                                              prd_user_histories[]
+  prd_user_history_points                                         prd_user_history_points[]
+  prd_user_history_rewards                                        prd_user_history_rewards[]
+  prd_user_infaq_program_reminders                                prd_user_infaq_program_reminders[]
+  prd_user_missions                                               prd_user_missions[]
+  prd_user_quran_ayah_favorites                                   prd_user_quran_ayah_favorites[]
+  prd_user_quran_ayah_marks                                       prd_user_quran_ayah_marks[]
+  prd_user_settings                                               prd_user_settings[]
+  prd_user_streaks                                                prd_user_streaks[]
+  prd_user_tier_rooms                                             prd_user_tier_rooms[]
+}
+
+model mst_user_quran_hafalan {
+  id                      String    @id @db.VarChar(100)
+  name                    String    @db.VarChar(100)
+  email                   String    @db.VarChar(100)
+  uid                     String    @db.VarChar(100)
+  tag_id                  String    @db.VarChar(6)
+  photo_url               String    @db.VarChar(255)
+  customize_photo_url     String?   @db.VarChar(255)
+  last_seen_quran_ayah_id Int?      @db.SmallInt
+  is_anonymous            Int       @default(dbgenerated("(0)::smallint")) @db.SmallInt
+  created_at              DateTime  @db.Timestamp(6)
+  updated_at              DateTime  @db.Timestamp(6)
+  deleted                 Int       @default(dbgenerated("(0)::smallint")) @db.SmallInt
+  deleted_at              DateTime? @db.Timestamp(6)
+  username                String?   @db.VarChar(100)
+  password                String?   @db.VarChar(100)
+  quran_fluent            Int?      @db.SmallInt
+  role                    String?   @default("user") @db.VarChar(20)
+  marked_quran_ayah_id    Int?      @db.SmallInt
+  total_point             Int       @default(0)
+  total_dziko             Int       @default(0)
+  birthplace              String?   @db.VarChar(100)
+  birthdate               DateTime? @db.Date
+  gender                  Int?      @db.SmallInt
+  address                 String?   @db.VarChar(255)
+  phone_number            String?   @db.VarChar(20)
+  identity_type           String?   @db.VarChar(50)
+  identity_number         String?   @db.VarChar(100)
+  mazhab                  String?   @db.VarChar(50)
+  device_type             String?   @db.VarChar(20)
+}
+
+model notification_send_logs {
+  id                String            @id(map: "notification_send_logs_pk") @db.VarChar(100)
+  notification_id   String            @db.VarChar(100)
+  created_at        DateTime          @db.Timestamp(6)
+  updated_at        DateTime          @db.Timestamp(6)
+  mst_notifications mst_notifications @relation(fields: [notification_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "notification_send_logs_mst_notification_id_fk")
+}
+
+model prd_audit_trail {
+  id              BigInt    @id @default(autoincrement())
+  username        String?   @db.VarChar(150)
+  action          String?   @db.VarChar(10)
+  table_name      String?   @db.VarChar(50)
+  row_id          String?   @db.VarChar(100)
+  data            String?
+  action_datetime DateTime? @db.Timestamp(6)
+  status          Int?      @db.SmallInt
+  error_message   String?
+}
+
+model prd_doa {
+  id                     String                   @id(map: "mst_doa_pkey") @db.VarChar(100)
+  doa_name               String?
+  arabic_text            String?
+  latin_text             String?
+  translate              String?
+  audio_name             String?                  @db.VarChar(150)
+  referensi              String?
+  created_at             DateTime?                @db.Timestamp(6)
+  updated_at             DateTime?                @db.Timestamp(6)
+  deleted                Int?                     @default(dbgenerated("(0)::smallint")) @db.SmallInt
+  category_id            String?                  @db.VarChar(100)
+  transliteration        String?
+  prd_user_doa_favorites prd_user_doa_favorites[]
+
+  @@index([category_id], map: "doa_category_idx")
+}
+
+model prd_dzikir {
+  id                        String                      @id @db.VarChar(100)
+  dzikir_name               String?                     @db.VarChar(150)
+  dzikir_category           String?                     @db.VarChar(150)
+  created_at                DateTime?                   @db.Timestamp(6)
+  updated_at                DateTime?                   @db.Timestamp(6)
+  is_reminder               Boolean?                    @default(false)
+  reminder_at               String?                     @db.VarChar
+  greeting                  String?                     @db.VarChar
+  color_reminder            String?                     @db.VarChar
+  type                      String?                     @db.VarChar
+  deleted                   Boolean?                    @default(false)
+  description               String?
+  mst_mission_details       mst_mission_details[]
+  prd_user_dzikir_favorites prd_user_dzikir_favorites[]
+  prd_user_histories        prd_user_histories[]
+  prd_user_history_points   prd_user_history_points[]
+  prd_user_history_rewards  prd_user_history_rewards[]
+
+  @@index([dzikir_category], map: "dzikir_category_idx")
+}
+
+model prd_dzikir_detail {
+  id                 String               @id @db.VarChar(100)
+  dzikir_id          String?              @db.VarChar(100)
+  repeat             Int?                 @db.SmallInt
+  created_at         DateTime?            @db.Timestamp(6)
+  updated_at         DateTime?            @db.Timestamp(6)
+  doa_name           String?              @db.VarChar(150)
+  arabic_text        String?
+  latin_text         String?
+  translate          String?
+  audio_name         String?              @db.VarChar(100)
+  referensi          String?
+  order_dzikir       Int?                 @db.SmallInt
+  deleted            Boolean?             @default(false)
+  prd_user_histories prd_user_histories[]
+
+  @@index([dzikir_id], map: "dzikir_idx_key")
+}
+
+model prd_islamic_content {
+  id            String    @id @db.VarChar(100)
+  content_title String?   @db.VarChar(100)
+  category_id   String?   @db.VarChar(100)
+  schedule_date DateTime? @db.Date
+  schedule_time String?   @db.VarChar(5)
+  description   String?
+  created_at    DateTime? @db.Timestamp(6)
+  updated_at    DateTime? @db.Timestamp(6)
+
+  @@index([category_id])
+}
+
+model prd_temp_dzikir {
+  id              String    @id @db.VarChar(100)
+  dzikir_name     String?   @db.VarChar(150)
+  dzikir_category String?   @db.VarChar(100)
+  created_at      DateTime? @db.Timestamp(6)
+  updated_at      DateTime? @db.Timestamp(6)
+  status          Int?      @db.SmallInt
+  dzikir_id       String?   @db.VarChar(100)
+
+  @@index([dzikir_category])
+  @@index([dzikir_id])
+}
+
+model prd_temp_dzikir_detail {
+  id           String    @id @db.VarChar(100)
+  dzikir_id    String?   @db.VarChar(100)
+  repeat       Int?      @db.SmallInt
+  created_at   DateTime? @db.Timestamp(6)
+  updated_at   DateTime? @db.Timestamp(6)
+  doa_name     String?   @db.VarChar(150)
+  arabic_text  String?
+  latin_text   String?
+  translate    String?
+  audio_name   String?   @db.VarChar(100)
+  referensi    String?
+  order_dzikir Int?      @db.SmallInt
+
+  @@index([dzikir_id])
+}
+
+model prd_tier_rooms {
+  id                  String                @id(map: "prd_tier_rooms_pk") @db.VarChar(100)
+  tier_id             String?               @db.VarChar(100)
+  room_end            DateTime?             @db.Timestamp(6)
+  created_at          DateTime?             @db.Timestamp(6)
+  updated_at          DateTime?             @db.Timestamp(6)
+  mst_tiers           mst_tiers?            @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_tier_rooms_mst_tiers_id_fk")
+  prd_user_tier_rooms prd_user_tier_rooms[]
+}
+
+model prd_tracker_user_mission_details {
+  id                        String                     @id(map: "prd_tracker_user_mission_details_pk") @db.VarChar(100)
+  tracker_user_mission_id   String?                    @db.VarChar(100)
+  mission_detail_id         String?                    @db.VarChar(100)
+  target                    Int?                       @default(0)
+  achievement               Int?                       @default(0)
+  created_at                DateTime?                  @db.Timestamp(6)
+  updated_at                DateTime?                  @db.Timestamp(6)
+  mst_mission_details       mst_mission_details?       @relation(fields: [mission_detail_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_tracker_user_mission_details_mst_mission_details_id_fk")
+  prd_tracker_user_missions prd_tracker_user_missions? @relation(fields: [tracker_user_mission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_tracker_user_mission_details_prd_tracker_user_missions_id_f")
+}
+
+model prd_tracker_user_missions {
+  id                               String                             @id(map: "prd_tracker_user_missions_pk") @db.VarChar(100)
+  user_id                          String?                            @db.VarChar(100)
+  mission_id                       String?                            @db.VarChar(100)
+  date                             DateTime?                          @db.Date
+  created_at                       DateTime?                          @db.Timestamp(6)
+  updated_at                       DateTime?                          @db.Timestamp(6)
+  total_point                      Int?                               @default(0)
+  prd_tracker_user_mission_details prd_tracker_user_mission_details[]
+  mst_missions                     mst_missions?                      @relation(fields: [mission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_tracker_user_missions_mst_missions_id_fk")
+  mst_user                         mst_user?                          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_tracker_user_missions_mst_user_id_fk")
+}
+
+model prd_user_badges {
+  id          String      @id(map: "prd_user_badges_pk") @db.VarChar(100)
+  user_id     String?     @db.VarChar(100)
+  badge_id    String?     @db.VarChar(100)
+  achievement Int         @default(0)
+  created_at  DateTime?   @db.Timestamp(6)
+  updated_at  DateTime?   @db.Timestamp(6)
+  deleted     Int?        @default(0) @db.SmallInt
+  achieved    Int?        @default(0) @db.SmallInt
+  status      Int?        @default(dbgenerated("(0)::smallint")) @db.SmallInt
+  mst_badges  mst_badges? @relation(fields: [badge_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_badges_mst_badge_id_fk")
+  mst_user    mst_user?   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_badges_mst_user_id_fk")
+}
+
+model prd_user_doa_favorites {
+  id         String   @id(map: "prd_user_doa_favorites_pk") @db.VarChar(100)
+  user_id    String   @db.VarChar(100)
+  doa_id     String?  @db.VarChar(100)
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  mst_user   mst_user @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "prd_user_doa_favorites_mst_user_id_fk")
+  prd_doa    prd_doa? @relation(fields: [doa_id], references: [id], onDelete: NoAction, map: "prd_user_doa_favorites_prd_doa_id_fk")
+}
+
+model prd_user_dzikir_favorites {
+  id           String       @id(map: "prd_user_dzikir_favorites_pk") @db.VarChar(100)
+  user_id      String       @db.VarChar(100)
+  dzikir_id    String       @db.VarChar(100)
+  category_id  String       @db.VarChar(100)
+  created_at   DateTime     @db.Timestamp(6)
+  updated_at   DateTime     @db.Timestamp(6)
+  mst_category mst_category @relation(fields: [category_id], references: [id], onDelete: NoAction, map: "prd_user_dzikir_favorites_mst_category_id_fk")
+  mst_user     mst_user     @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "prd_user_dzikir_favorites_mst_user_id_fk")
+  prd_dzikir   prd_dzikir   @relation(fields: [dzikir_id], references: [id], onDelete: NoAction, map: "prd_user_dzikir_favorites_prd_dzikir_id_fk")
+}
+
+model prd_user_goals {
+  id         String    @id(map: "prd_user_goals_pk") @db.VarChar(100)
+  user_id    String?   @db.VarChar(100)
+  name       String?   @db.VarChar(20)
+  created_at DateTime? @db.Timestamp(6)
+  updated_at DateTime? @db.Timestamp(6)
+  mst_user   mst_user? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_goals_mst_user_id_fk")
+}
+
+model prd_user_histories {
+  id                String             @id(map: "prd_user_histories_pk") @db.VarChar
+  user_id           String?            @db.VarChar(100)
+  date              DateTime?          @db.Date
+  type              String?            @db.VarChar(100)
+  name              String?            @db.VarChar(150)
+  start_marker      Int?               @default(0)
+  end_marker        Int?               @default(0)
+  created_at        DateTime?          @db.Timestamp(6)
+  updated_at        DateTime?          @db.Timestamp(6)
+  dzikir_id         String?            @db.VarChar(100)
+  dzikir_detail_id  String?            @db.VarChar(100)
+  total_ayah        Int?               @default(0)
+  mst_user          mst_user?          @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_histories_mst_user_id_fk")
+  prd_dzikir_detail prd_dzikir_detail? @relation(fields: [dzikir_detail_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_histories_prd_dzikir_detail_id_fk")
+  prd_dzikir        prd_dzikir?        @relation(fields: [dzikir_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_histories_prd_dzikir_id_fk")
+
+  @@index([date], map: "prd_user_histories_date_index")
+  @@index([name], map: "prd_user_histories_name_index")
+  @@index([type], map: "prd_user_histories_type_index")
+  @@index([user_id, date, type, name], map: "prd_user_histories_user_id_date_type_name_index")
+}
+
+model prd_user_history_points {
+  id           String        @id(map: "prd_user_history_points_pk") @db.VarChar
+  user_id      String?       @db.VarChar(100)
+  type         String?       @db.VarChar(100)
+  date         DateTime?     @db.Date
+  mission_id   String?       @db.VarChar(100)
+  in_point     Int?          @default(0)
+  out_point    Int?          @default(0)
+  created_at   DateTime?     @db.Timestamp(6)
+  updated_at   DateTime?     @db.Timestamp(6)
+  dzikir_id    String?       @db.VarChar(100)
+  mst_missions mst_missions? @relation(fields: [mission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_history_points_mst_missions_id_fk")
+  mst_user     mst_user?     @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_history_points_mst_user_id_fk")
+  prd_dzikir   prd_dzikir?   @relation(fields: [dzikir_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_history_points_prd_dzikir_id_fk")
+}
+
+model prd_user_history_rewards {
+  id                  String               @id(map: "prd_user_history_rewards_pk") @db.VarChar(100)
+  user_id             String?              @db.VarChar(100)
+  mission_detail_id   String?              @db.VarChar(100)
+  value               Int?
+  type                String?              @db.VarChar(100)
+  created_at          DateTime?            @db.Timestamp(6)
+  updated_at          DateTime?            @db.Timestamp(6)
+  date                DateTime?            @db.Date
+  source              String?              @db.VarChar(255)
+  mission_id          String?              @db.VarChar(100)
+  dzikir_id           String?              @db.VarChar(100)
+  tier_id             String?              @db.VarChar(100)
+  pages               String?              @db.VarChar
+  infaq_id            String?              @db.VarChar(100)
+  mst_mission_details mst_mission_details? @relation(fields: [mission_detail_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "prd_user_history_rewards_mst_mission_details_id_fk")
+  mst_missions        mst_missions?        @relation(fields: [mission_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "prd_user_history_rewards_mst_missions_id_fk")
+  mst_user            mst_user?            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_history_rewards_mst_user_id_fk")
+  prd_dzikir          prd_dzikir?          @relation(fields: [dzikir_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_history_rewards_prd_dzikir_id_fk")
+  mst_tiers           mst_tiers?           @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_history_rewards_prd_tier_id_fk")
+}
+
+model prd_user_infaq_program_reminders {
+  id                 String             @id(map: "prd_user_infaq_program_reminder_pk") @db.VarChar(100)
+  user_id            String             @db.VarChar(100)
+  infaq_program_id   String             @db.VarChar(100)
+  created_at         DateTime           @db.Timestamp(6)
+  updated_at         DateTime           @db.Timestamp(6)
+  status             Int                @db.SmallInt
+  mst_infaq_programs mst_infaq_programs @relation(fields: [infaq_program_id], references: [id], onDelete: NoAction, map: "prd_user_infaq_program_reminder_mst_infaq_programs_id_fk")
+  mst_user           mst_user           @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "prd_user_infaq_program_reminder_mst_user_id_fk")
+}
+
+model prd_user_mission_reminders {
+  id                  String             @id(map: "prd_user_mission_reminders_pk") @db.VarChar(100)
+  user_mission_id     String?            @db.VarChar(100)
+  mission_detail_name String?            @db.VarChar
+  is_reminder         Boolean?           @default(false)
+  reminder_at         String?            @db.VarChar(5)
+  created_at          DateTime?          @db.Timestamp(6)
+  updated_at          DateTime?          @db.Timestamp(6)
+  type                String?            @db.VarChar
+  prd_user_missions   prd_user_missions? @relation(fields: [user_mission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_mission_reminders_prd_user_missions_id_fk")
+}
+
+model prd_user_missions {
+  id                         String                       @id(map: "trx_user_missions_pk") @db.VarChar(100)
+  user_id                    String?                      @db.VarChar(100)
+  mission_id                 String?                      @db.VarChar(100)
+  created_at                 DateTime?                    @db.Timestamp(6)
+  updated_at                 DateTime?                    @db.Timestamp(6)
+  total_point                Int?                         @default(0)
+  reminder_at                String?                      @db.VarChar(10)
+  mission_end_date           DateTime?                    @db.Date
+  mission_start_date         DateTime?                    @db.Date
+  prd_user_mission_reminders prd_user_mission_reminders[]
+  mst_missions               mst_missions?                @relation(fields: [mission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trx_user_missions_mst_missions_id_fk")
+  mst_user                   mst_user?                    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "trx_user_missions_mst_user_id_fk")
+}
+
+model prd_user_quran_ayah_favorites {
+  id              String           @id(map: "prd_user_quran_ayah_favorites_pk") @db.VarChar(100)
+  user_id         String           @db.VarChar(100)
+  surah_id        Int?             @db.SmallInt
+  ayah_id         Int?             @db.SmallInt
+  created_at      DateTime         @db.Timestamp(6)
+  updated_at      DateTime         @db.Timestamp(6)
+  mst_quran_ayah  mst_quran_ayah?  @relation(fields: [ayah_id], references: [id], onDelete: NoAction, map: "prd_user_quran_ayah_favorites_mst_quran_ayah_id_fk")
+  mst_quran_surah mst_quran_surah? @relation(fields: [surah_id], references: [id], onDelete: NoAction, map: "prd_user_quran_ayah_favorites_mst_quran_surah_id_fk")
+  mst_user        mst_user         @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "prd_user_quran_ayah_favorites_mst_user_id_fk")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model prd_user_quran_ayah_marks {
+  id              String           @id(map: "prd_user_quran_ayah_marks_pk") @db.VarChar(100)
+  user_id         String?          @db.VarChar(100)
+  quran_surah_id  Int?             @db.SmallInt
+  quran_ayah_id   Int?             @db.SmallInt
+  name            String?          @db.VarChar(50)
+  color           String?          @db.VarChar(7)
+  created_at      DateTime?        @db.Timestamp(6)
+  updated_at      DateTime?        @db.Timestamp(6)
+  deleted         Boolean?         @default(false)
+  mst_user        mst_user?        @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "mst_user_mst_quran_ayah_id_fk")
+  mst_quran_ayah  mst_quran_ayah?  @relation(fields: [quran_ayah_id], references: [id], onDelete: NoAction, map: "prd_user_quran_ayah_marks_mst_quran_ayah_id_fk")
+  mst_quran_surah mst_quran_surah? @relation(fields: [quran_surah_id], references: [id], onDelete: NoAction, map: "prd_user_quran_ayah_marks_mst_quran_surah_id_fk")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model prd_user_settings {
+  id                        String   @id(map: "prd_user_settings_pk") @db.VarChar(100)
+  user_id                   String   @db.VarChar(100)
+  type                      String?  @db.VarChar(100)
+  translation_status        Int?     @default(0) @db.SmallInt
+  transliteration_status    Int?     @default(0) @db.SmallInt
+  arabic_font_size          Int?     @default(0) @db.SmallInt
+  transliteration_font_size Int?     @default(0) @db.SmallInt
+  created_at                DateTime @db.Timestamp(6)
+  updated_at                DateTime @db.Timestamp(6)
+  mst_user                  mst_user @relation(fields: [user_id], references: [id], onDelete: NoAction, map: "prd_user_settings_mst_user_id_fk")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model prd_user_streak_backup_20230804 {
+  id          String?   @db.VarChar(100)
+  user_id     String?   @db.VarChar(100)
+  date        DateTime? @db.Date
+  dzikir_done Boolean?
+  quran_done  Boolean?
+  created_at  DateTime? @db.Timestamp(6)
+  updated_at  DateTime? @db.Timestamp(6)
+
+  @@ignore
+}
+
+model prd_user_streaks {
+  id          String    @id(map: "prd_user_streaks_pk") @db.VarChar(100)
+  user_id     String?   @db.VarChar(100)
+  date        DateTime? @db.Date
+  dzikir_done Boolean?  @default(false)
+  quran_done  Boolean?  @default(false)
+  created_at  DateTime? @db.Timestamp(6)
+  updated_at  DateTime? @db.Timestamp(6)
+  infaq_done  Boolean?  @default(false)
+  mst_user    mst_user? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_streaks_mst_user_id_fk")
+
+  @@index([date], map: "prd_user_streaks_date_index")
+}
+
+model prd_user_tier_rooms {
+  id             String          @id(map: "prd_tier_user_pk") @db.VarChar(100)
+  user_id        String?         @db.VarChar(100)
+  tier_room_id   String?         @db.VarChar(100)
+  total_point    Int?
+  created_at     DateTime?       @db.Timestamp(6)
+  updated_at     DateTime?       @db.Timestamp(6)
+  mst_user       mst_user?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_tier_rooms_mst_user_id_fk")
+  prd_tier_rooms prd_tier_rooms? @relation(fields: [tier_room_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "prd_user_tier_rooms_prd_tier_rooms_id_fk")
+}

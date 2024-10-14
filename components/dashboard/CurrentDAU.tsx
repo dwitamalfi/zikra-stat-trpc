@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { trpc } from "../../utils/trpc";
 
 // Register necessary Chart.js components
 ChartJS.register(
@@ -24,12 +25,22 @@ ChartJS.register(
 );
 
 export default function CurrentDAU() {
+  const { data: dataDaily, isLoading, isFetching } = trpc.getDailyUser.useQuery();
+  let dataLabel;
+
+  dataLabel = dataDaily?.data.user.map((item)=>{
+    let dateStr = new Date(item.date);
+    const formattedDate = `${("0" + dateStr.getDate()).slice(-2)}-${("0" + (dateStr.getMonth() + 1)).slice(-2)}-${dateStr.getFullYear()}`;
+    return formattedDate;
+  })
+  let dataUser = dataDaily?.data.user.map((item)=>{return Number(item.count)})
+  
   const data = {
-    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    labels: dataLabel,
     datasets: [
       {
         label: 'DAU (Daily Active Users)',
-        data: [1200, 1500, 1100, 1600, 1700, 1400, 1300],
+        data: dataUser,
         fill: false,
         borderColor: 'rgba(75,192,192,1)',
         tension: 0.1,
@@ -38,7 +49,8 @@ export default function CurrentDAU() {
       },
     ],
   };
-
+  console.log("dataDaily",dataDaily);
+  
   const options = {
     responsive: true,
     plugins: {
