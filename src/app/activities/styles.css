@@ -1,0 +1,13 @@
+.table-style {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-child {
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.table-style tr {
+  border-bottom: 1px solid #ccc;
+}
