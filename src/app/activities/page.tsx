@@ -4,13 +4,38 @@ import React, { Key, useEffect, useState } from "react"
 import { trpc } from "../../../utils/trpc"
 import "./styles.css"
 import { ActivitySchema } from "./types/activity-schema"
+import "react-date-range/dist/styles.css"
+import "react-date-range/dist/theme/default.css"
+import { DateRange } from "react-date-range"
 
 const Page2 = () => {
   const [search, setSearch] = useState("")
+  const [dateVisibile, setDateVisible] = useState(false)
+  const [dateSelected, setDateSelected] = useState<{
+    selection: { startDate: Date | null; endDate: Date | null; key: string }
+  }>({
+    selection: {
+      startDate: null,
+      endDate: null,
+      key: "selection",
+    },
+  })
+
+  const handleSelect = (ranges: any) => {
+    setDateSelected({ selection: ranges.selection })
+
+    console.log("Start date " + dateSelected.selection.startDate)
+    console.log("End date" + dateSelected.selection.endDate)
+  }
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     trpc.getAllActivity.useInfiniteQuery(
-      { limit: 20, key: search },
+      {
+        limit: 20,
+        key: search,
+        startDate: dateSelected.selection.startDate,
+        endDate: dateSelected.selection.endDate,
+      },
       {
         getNextPageParam: (lastPage: any) => {
           return lastPage.hasMore ? lastPage.nextPage : undefined
@@ -43,16 +68,37 @@ const Page2 = () => {
 
   return (
     <div>
-      <div className='flex justify-between mb-4'>
+      <div className='flex mb-4'>
         <input
           type='text'
           id='first_name'
-          className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 mr-10 w-1/2'
+          className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 mr-5 w-1/2'
           placeholder='Search Page'
           onChange={handleLiveSearch}
           value={search}
-          required
         />
+        <div className='relative'>
+          <button
+            onClick={() => setDateVisible(!dateVisibile)}
+            className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block p-2.5'
+          >
+            {dateSelected.selection.endDate == null ||
+            dateSelected.selection.startDate == null
+              ? "Select Date"
+              : `
+              ${dateSelected.selection.startDate.toLocaleDateString()} - ${dateSelected.selection.endDate.toLocaleDateString()}`}
+          </button>
+
+          {dateVisibile && (
+            <div className='absolute z-10 bg-white p-4 rounded-md shadow-lg'>
+              <DateRange
+                ranges={[dateSelected.selection]}
+                onChange={handleSelect}
+                className='bg-white'
+              />
+            </div>
+          )}
+        </div>
       </div>
       {isLoading ? (
         <p>Loading...</p>

@@ -9,6 +9,8 @@ export const filterQuery = object({
   limit: number().default(10),
   page: number().default(1),
   key: string().nullable(),
+  startDate: date().nullable(),
+  endDate: date().nullable(),
 })
 
 export type CreateUserInput = TypeOf<typeof createUserSchema>
