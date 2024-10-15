@@ -133,7 +133,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\Personal Project\\zikra-stat-trpc\\prisma\\generated\\client2",
+      "value": "/Users/iqbalrahmatullah/Downloads/zikra-analytic/prisma/generated/client2",
       "fromEnvVar": null
     },
     "config": {
@@ -142,16 +142,20 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "windows",
+        "value": "darwin-arm64",
         "native": true
+      },
+      {
+        "fromEnvVar": null,
+        "value": "darwin-arm64"
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\Personal Project\\zikra-stat-trpc\\prisma\\schema2.prisma",
+    "sourceFilePath": "/Users/iqbalrahmatullah/Downloads/zikra-analytic/prisma/schema2.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
+    "rootEnvPath": null,
     "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../..",
@@ -170,8 +174,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"./generated/client2\"\n}\n\ndatasource db2 {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE2_URL\")\n}\n\nmodel trx_user_activities {\n  id             String    @id @db2.VarChar\n  user_id        String?   @db2.VarChar\n  date           DateTime? @db2.Date\n  page           String?   @db2.VarChar\n  action         String?   @db2.VarChar\n  created_at     DateTime? @db2.Timestamp(6)\n  updated_at     DateTime? @db2.Timestamp(6)\n  email          String?   @db2.VarChar\n  reference_id   String?   @db2.VarChar\n  reference_type String?   @db2.VarChar\n\n  @@index([date], map: \"trx_user_activities_date_index\")\n  @@index([user_id, date], map: \"trx_user_activities_user_id_date_index\")\n  @@index([user_id], map: \"trx_user_activities_user_id_index\")\n}\n",
-  "inlineSchemaHash": "cb4b3b84a22e7b0683c14c610ae5e668953deefe91f179ea2a4482a297f174e1",
+  "inlineSchema": "generator client {\n  provider      = \"prisma-client-js\"\n  output        = \"./generated/client2\"\n  binaryTargets = [\"native\", \"darwin-arm64\"]\n}\n\ndatasource db2 {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE2_URL\")\n}\n\nmodel trx_user_activities {\n  id             String    @id @db2.VarChar\n  user_id        String?   @db2.VarChar\n  date           DateTime? @db2.Date\n  page           String?   @db2.VarChar\n  action         String?   @db2.VarChar\n  created_at     DateTime? @db2.Timestamp(6)\n  updated_at     DateTime? @db2.Timestamp(6)\n  email          String?   @db2.VarChar\n  reference_id   String?   @db2.VarChar\n  reference_type String?   @db2.VarChar\n\n  @@index([date], map: \"trx_user_activities_date_index\")\n  @@index([user_id, date], map: \"trx_user_activities_user_id_date_index\")\n  @@index([user_id], map: \"trx_user_activities_user_id_index\")\n}\n",
+  "inlineSchemaHash": "e163f79be35bcf52cf0f9c40f006cf89be9782ad7e3faf512c80afff3d923b3f",
   "copyEngine": true
 }
 config.dirname = '/'

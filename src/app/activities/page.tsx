@@ -1,74 +1,78 @@
-"use client";
+"use client"
 
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { trpc } from "../../../utils/trpc";
-import { useEffect, useRef } from "react";
+import React, { useEffect } from "react"
+import { trpc } from "../../../utils/trpc"
+import "./styles.css"
 
-const fetchUserActivities = async ({ pageParam = 1 }) => {
-    const response = await trpc.getAllActivity.useQuery({
-        page: pageParam,
-        limit: 10, // Number of items per page
-    });
-    return response;
-};
+const Page2 = () => {
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
+    trpc.getAllActivity.useInfiniteQuery(
+      { limit: 20 },
+      {
+        getNextPageParam: (lastPage) => {
+          return lastPage.hasMore ? lastPage.nextPage : undefined
+        },
+      }
+    )
 
-export default function Activities() {
-    const {
-        data,
-        isLoading,
-        fetchNextPage,
-        hasNextPage,
-        isFetchingNextPage,
-    } = useInfiniteQuery(
-        ['userActivities'], // Query key
-        fetchUserActivities, // Fetching function
-        {
-            getNextPageParam: (lastPage, allPages) => {
-                return lastPage.data?.hasMore ? allPages.length + 1 : undefined;
-            },
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 100
+      ) {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
         }
-    );
-
-    const observer = useRef<IntersectionObserver | null>(null);
-    const lastActivityElementRef = useRef<HTMLDivElement | null>(null);
-
-    useEffect(() => {
-        if (lastActivityElementRef.current) {
-            if (observer.current) observer.current.disconnect();
-
-            observer.current = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting && hasNextPage) {
-                    fetchNextPage();
-                }
-            });
-
-            observer.current.observe(lastActivityElementRef.current);
-        }
-
-        return () => {
-            if (observer.current) observer.current.disconnect();
-        };
-    }, [hasNextPage, fetchNextPage]);
-
-    if (isLoading) {
-        return <div>Loading...</div>;
+      }
     }
 
-    return (
-        <div>
-            {data?.pages.map((page, pageIndex) => (
-                <div key={pageIndex}>
-                    {page.data?.activities.map((activity, index) => {
-                        const isLastElement = pageIndex === data.pages.length - 1 && index === page.data.activities.length - 1;
-                        return (
-                            <div key={activity.id} ref={isLastElement ? lastActivityElementRef : null}>
-                                {activity.page}
-                            </div>
-                        );
-                    })}
-                </div>
-            ))}
-            {isFetchingNextPage && <div>Loading more...</div>}
-        </div>
-    );
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
+  if (isLoading) return <div>Loading...</div>
+
+  return (
+    <div>
+      <table className='table-style'>
+        <thead>
+          <tr>
+            <th className='table-child'>Email</th>
+            <th className='table-child'>Action</th>
+            <th className='table-child'>Page</th>
+            <th className='table-child'>Date</th>
+            <th className='table-child'>Created At</th>
+            <th className='table-child'>Updated At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data?.pages.map((page, index) => (
+            <React.Fragment key={index}>
+              {page.activities.map((activity) => (
+                <tr key={activity.id}>
+                  <td className='table-child'>{activity.email}</td>
+                  <td className='table-child'>{activity.action}</td>
+                  <td className='table-child'>{activity.page}</td>
+
+                  <td className='table-child'>
+                    {new Date(activity.date).toLocaleString()}
+                  </td>
+                  <td className='table-child'>
+                    {new Date(activity.created_at).toLocaleString()}
+                  </td>
+                  <td className='table-child'>
+                    {new Date(activity.updated_at).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </React.Fragment>
+          ))}
+        </tbody>
+      </table>
+      {isFetchingNextPage && <div>Loading more...</div>}
+    </div>
+  )
 }
+
+export default Page2

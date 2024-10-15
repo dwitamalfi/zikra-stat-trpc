@@ -35,13 +35,13 @@
 .gradient-fadeout-hr {
   width: 100%;
   height: 2px;
-  background: linear-gradient(to right, transparent, #E0E1E2, transparent);
+  background: linear-gradient(to right, transparent, #e0e1e2, transparent);
   animation: fadeOut 3s linear infinite;
 }
 .gradient-fadeout-vr {
   width: 2px; /* This makes the line vertical */
   height: 100%; /* This controls the height of the line */
-  background: linear-gradient(to bottom, transparent, #E0E1E2, transparent);
+  background: linear-gradient(to bottom, transparent, #e0e1e2, transparent);
   animation: fadeOut 3s linear infinite;
 }
 .border-right-here {
@@ -49,12 +49,12 @@
 }
 
 .border-right-here:after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   right: 0;
   width: 2px; /* Width of the border */
   height: 100%;
-  background: linear-gradient(to bottom, transparent, #E0E1E2, transparent);
+  background: linear-gradient(to bottom, transparent, #e0e1e2, transparent);
   animation: fadeOut 3s linear infinite;
 }
