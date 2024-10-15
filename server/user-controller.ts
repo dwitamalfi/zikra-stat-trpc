@@ -1,6 +1,6 @@
 import { prismaDb1, prismaDb2 } from "./../prisma/prisma-client"
 import { TRPCError } from "@trpc/server"
-import { CreateUserInput, FilterQueryInput } from "./user-schema"
+import { FilterQueryInput } from "./user-schema"
 
 export const getUserList = async ({
   filterQuery,
@@ -134,15 +134,119 @@ export const getAllActivity = async ({
     const { limit, page } = filterQuery
     const take = limit || 10
     const skip = (page - 1) * limit
-    console.log("skip", skip)
-    console.log("page", page)
 
-    const activities = await prismaDb2.trx_user_activities.findMany({
-      skip,
-      take,
-      orderBy: [{ created_at: "desc" }],
-    })
-    const totalActivities = await prismaDb2.trx_user_activities.count()
+    if (filterQuery.endDate != null) {
+      let tempDate = new Date(filterQuery.endDate)
+      tempDate.setDate(tempDate.getDate() + 1)
+
+      filterQuery.endDate = tempDate
+    }
+
+    let activities
+    let totalActivities
+
+    if (
+      filterQuery.key != null &&
+      filterQuery.startDate == null &&
+      filterQuery.endDate == null
+    ) {
+      activities = await prismaDb2.trx_user_activities.findMany({
+        skip,
+        take,
+        where: {
+          page: {
+            contains: filterQuery.key,
+          },
+        },
+        orderBy: [{ created_at: "desc" }],
+      })
+      totalActivities = await prismaDb2.trx_user_activities.count({
+        where: {
+          page: {
+            contains: filterQuery.key,
+          },
+        },
+      })
+    } else if (
+      filterQuery.key == null &&
+      filterQuery.startDate != null &&
+      filterQuery.endDate != null
+    ) {
+      console.log("Start date " + filterQuery.startDate)
+      console.log("End date " + filterQuery.endDate)
+
+      activities = await prismaDb2.trx_user_activities.findMany({
+        skip,
+        take,
+        where: {
+          date: {
+            gte: filterQuery.startDate,
+            lte: filterQuery.endDate,
+          },
+        },
+        orderBy: [{ created_at: "desc" }],
+      })
+      totalActivities = await prismaDb2.trx_user_activities.count({
+        where: {
+          date: {
+            gte: filterQuery.startDate,
+            lte: filterQuery.endDate,
+          },
+        },
+      })
+    } else if (
+      filterQuery.key != null &&
+      filterQuery.startDate != null &&
+      filterQuery.endDate != null
+    ) {
+      console.log("Start date " + filterQuery.startDate)
+      console.log("End date " + filterQuery.endDate)
+
+      activities = await prismaDb2.trx_user_activities.findMany({
+        skip,
+        take,
+        where: {
+          AND: [
+            {
+              date: {
+                gte: filterQuery.startDate,
+                lte: filterQuery.endDate,
+              },
+
+              page: {
+                contains: filterQuery.key,
+              },
+            },
+            {},
+          ],
+        },
+        orderBy: [{ created_at: "desc" }],
+      })
+      totalActivities = await prismaDb2.trx_user_activities.count({
+        where: {
+          AND: [
+            {
+              date: {
+                gte: filterQuery.startDate,
+                lte: filterQuery.endDate,
+              },
+
+              page: {
+                contains: filterQuery.key,
+              },
+            },
+            {},
+          ],
+        },
+      })
+    } else {
+      activities = await prismaDb2.trx_user_activities.findMany({
+        skip,
+        take,
+        orderBy: [{ created_at: "desc" }],
+      })
+      totalActivities = await prismaDb2.trx_user_activities.count()
+    }
 
     return {
       activities,

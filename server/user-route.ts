@@ -1,4 +1,4 @@
-import { createUserSchema, filterQuery } from "./user-schema"
+import { filterQuery } from "./user-schema"
 import {
   getAllActivity,
   getDailyUser,
