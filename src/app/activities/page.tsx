@@ -1,15 +1,16 @@
 "use client"
 
-import React, { useEffect } from "react"
+import React, { Key, useEffect } from "react"
 import { trpc } from "../../../utils/trpc"
 import "./styles.css"
+import { ActivitySchema } from "./types/activity-schema"
 
 const Page2 = () => {
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
     trpc.getAllActivity.useInfiniteQuery(
       { limit: 20 },
       {
-        getNextPageParam: (lastPage) => {
+        getNextPageParam: (lastPage: any) => {
           return lastPage.hasMore ? lastPage.nextPage : undefined
         },
       }
@@ -47,9 +48,9 @@ const Page2 = () => {
           </tr>
         </thead>
         <tbody>
-          {data?.pages.map((page, index) => (
+          {data?.pages.map((page: any, index: Key) => (
             <React.Fragment key={index}>
-              {page.activities.map((activity) => (
+              {page.activities.map((activity: ActivitySchema) => (
                 <tr key={activity.id}>
                   <td className='table-child'>{activity.email}</td>
                   <td className='table-child'>{activity.action}</td>
