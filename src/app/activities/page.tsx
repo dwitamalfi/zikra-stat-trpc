@@ -8,15 +8,21 @@ import "react-date-range/dist/styles.css"
 import "react-date-range/dist/theme/default.css"
 import { DateRange } from "react-date-range"
 
-const Page2 = () => {
+const ActiviesPage = () => {
   const [search, setSearch] = useState("")
   const [dateVisibile, setDateVisible] = useState(false)
+
+  var myDate = new Date()
+  myDate.setHours(0, 0, 0, 0)
+
+  console.log("My Date " + myDate)
+
   const [dateSelected, setDateSelected] = useState<{
     selection: { startDate: Date | null; endDate: Date | null; key: string }
   }>({
     selection: {
-      startDate: null,
-      endDate: null,
+      startDate: myDate,
+      endDate: myDate,
       key: "selection",
     },
   })
@@ -38,6 +44,7 @@ const Page2 = () => {
       },
       {
         getNextPageParam: (lastPage: any) => {
+          console.log("Last Page " + lastPage.nextPage)
           return lastPage.hasMore ? lastPage.nextPage : undefined
         },
       }
@@ -116,8 +123,9 @@ const Page2 = () => {
           </thead>
 
           <tbody>
-            {data?.pages[0].activities.length > 0 ? (
-              data.pages.map((page: any, index: Key) => (
+            {data?.pages != undefined &&
+            data?.pages[0].activities.length > 0 ? (
+              data!.pages.map((page: any, index: Key) => (
                 <React.Fragment key={index}>
                   {page.activities.map((activity: ActivitySchema) => (
                     <tr key={activity.id}>
@@ -152,4 +160,4 @@ const Page2 = () => {
   )
 }
 
-export default Page2
+export default ActiviesPage
