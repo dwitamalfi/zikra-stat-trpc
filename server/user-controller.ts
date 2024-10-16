@@ -131,127 +131,44 @@ export const getAllActivity = async ({
   filterQuery: FilterQueryInput
 }) => {
   try {
-    const { limit, page } = filterQuery
+    const { limit, key, startDate, endDate, cursor } = filterQuery
     const take = limit || 10
-    const skip = (page - 1) * limit
 
-    if (filterQuery.endDate != null) {
-      let tempDate = new Date(filterQuery.endDate)
-      tempDate.setDate(tempDate.getDate() + 1)
+    const finalEndDate = endDate
+      ? new Date(new Date(endDate).setDate(new Date(endDate).getDate() + 1))
+      : null
 
-      filterQuery.endDate = tempDate
+    const finalStartDate = startDate
+      ? new Date(new Date(startDate).setDate(new Date(startDate).getDate() + 1))
+      : null
+
+    const where: any = {}
+
+    if (key && key.trim()) {
+      where.page = { contains: key }
     }
 
-    let activities
-    let totalActivities
-
-    if (
-      filterQuery.key != null &&
-      filterQuery.startDate == null &&
-      filterQuery.endDate == null
-    ) {
-      activities = await prismaDb2.trx_user_activities.findMany({
-        skip,
-        take,
-        where: {
-          page: {
-            contains: filterQuery.key,
-          },
-        },
-        orderBy: [{ created_at: "desc" }],
-      })
-      totalActivities = await prismaDb2.trx_user_activities.count({
-        where: {
-          page: {
-            contains: filterQuery.key,
-          },
-        },
-      })
-    } else if (
-      filterQuery.key == null &&
-      filterQuery.startDate != null &&
-      filterQuery.endDate != null
-    ) {
-      console.log("Start date " + filterQuery.startDate)
-      console.log("End date " + filterQuery.endDate)
-
-      activities = await prismaDb2.trx_user_activities.findMany({
-        skip,
-        take,
-        where: {
-          date: {
-            gte: filterQuery.startDate,
-            lte: filterQuery.endDate,
-          },
-        },
-        orderBy: [{ created_at: "desc" }],
-      })
-      totalActivities = await prismaDb2.trx_user_activities.count({
-        where: {
-          date: {
-            gte: filterQuery.startDate,
-            lte: filterQuery.endDate,
-          },
-        },
-      })
-    } else if (
-      filterQuery.key != null &&
-      filterQuery.startDate != null &&
-      filterQuery.endDate != null
-    ) {
-      console.log("Start date " + filterQuery.startDate)
-      console.log("End date " + filterQuery.endDate)
-
-      activities = await prismaDb2.trx_user_activities.findMany({
-        skip,
-        take,
-        where: {
-          AND: [
-            {
-              date: {
-                gte: filterQuery.startDate,
-                lte: filterQuery.endDate,
-              },
-
-              page: {
-                contains: filterQuery.key,
-              },
-            },
-            {},
-          ],
-        },
-        orderBy: [{ created_at: "desc" }],
-      })
-      totalActivities = await prismaDb2.trx_user_activities.count({
-        where: {
-          AND: [
-            {
-              date: {
-                gte: filterQuery.startDate,
-                lte: filterQuery.endDate,
-              },
-
-              page: {
-                contains: filterQuery.key,
-              },
-            },
-            {},
-          ],
-        },
-      })
-    } else {
-      activities = await prismaDb2.trx_user_activities.findMany({
-        skip,
-        take,
-        orderBy: [{ created_at: "desc" }],
-      })
-      totalActivities = await prismaDb2.trx_user_activities.count()
+    if (startDate && finalEndDate) {
+      where.date = { gte: finalStartDate, lte: finalEndDate }
     }
+
+    const activities = await prismaDb2.trx_user_activities.findMany({
+      take,
+      where,
+      orderBy: [{ created_at: "desc" }],
+      ...(cursor && {
+        cursor: {
+          id: cursor,
+        },
+        skip: 1,
+      }),
+    })
 
     return {
       activities,
-      hasMore: skip + activities.length < totalActivities,
-      nextPage: page + 1,
+      hasMore: activities.length > 0 && activities.length === take,
+      nextPage:
+        activities.length > 0 ? activities[activities.length - 1].id : null,
     }
   } catch (err: any) {
     throw new TRPCError({
