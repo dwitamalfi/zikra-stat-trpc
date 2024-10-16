@@ -16,7 +16,7 @@ const ActivitiesPage = () => {
   myDate.setHours(0, 0, 0, 0)
 
   const [dateSelected, setDateSelected] = useState<{
-    selection: { startDate: Date | null; endDate: Date | null; key: string }
+    selection: { startDate: Date | undefined; endDate: Date | undefined; key: string }
   }>({
     selection: {
       startDate: myDate,
@@ -34,8 +34,8 @@ const ActivitiesPage = () => {
       {
         limit: 20,
         key: search,
-        startDate: dateSelected.selection.startDate,
-        endDate: dateSelected.selection.endDate,
+        startDate: dateSelected.selection.startDate || null,
+        endDate: dateSelected.selection.endDate || null,
       },
       {
         getNextPageParam: (lastPage: any) => {

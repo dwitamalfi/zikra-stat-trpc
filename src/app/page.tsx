@@ -6,6 +6,9 @@ export default function Home() {
   const { data, isLoading, isFetching } = trpc.getUserList.useQuery({
     limit: 10,
     page: 1,
+    key: null,
+    startDate: null,
+    endDate: null
   })
 
   const {
