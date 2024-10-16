@@ -8,14 +8,12 @@ import "react-date-range/dist/styles.css"
 import "react-date-range/dist/theme/default.css"
 import { DateRange } from "react-date-range"
 
-const ActiviesPage = () => {
+const ActivitiesPage = () => {
   const [search, setSearch] = useState("")
   const [dateVisibile, setDateVisible] = useState(false)
 
   var myDate = new Date()
   myDate.setHours(0, 0, 0, 0)
-
-  console.log("My Date " + myDate)
 
   const [dateSelected, setDateSelected] = useState<{
     selection: { startDate: Date | null; endDate: Date | null; key: string }
@@ -29,9 +27,6 @@ const ActiviesPage = () => {
 
   const handleSelect = (ranges: any) => {
     setDateSelected({ selection: ranges.selection })
-
-    console.log("Start date " + dateSelected.selection.startDate)
-    console.log("End date" + dateSelected.selection.endDate)
   }
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } =
@@ -44,7 +39,6 @@ const ActiviesPage = () => {
       },
       {
         getNextPageParam: (lastPage: any) => {
-          console.log("Last Page " + lastPage.nextPage)
           return lastPage.hasMore ? lastPage.nextPage : undefined
         },
       }
@@ -160,4 +154,4 @@ const ActiviesPage = () => {
   )
 }
 
-export default ActiviesPage
+export default ActivitiesPage
