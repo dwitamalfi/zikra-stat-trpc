@@ -131,7 +131,7 @@ export const getAllActivity = async ({
   filterQuery: FilterQueryInput
 }) => {
   try {
-    const { limit, key, startDate, endDate, cursor } = filterQuery
+    const { limit, key, startDate, endDate, cursor, user_id } = filterQuery
     const take = limit || 10
 
     const finalEndDate = endDate
@@ -143,6 +143,10 @@ export const getAllActivity = async ({
       : null
 
     const where: any = {}
+
+    if (user_id !== null) {
+      where.user_id = user_id
+    }
 
     if (key && key.trim()) {
       where.page = { contains: key }
