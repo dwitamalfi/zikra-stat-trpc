@@ -8,6 +8,7 @@ export const createUserSchema = object({
 export const filterQuery = object({
   limit: number().default(10),
   cursor: string().nullish(),
+  user_id: string().nullable().default(null),
   page: number().default(1),
   key: string().nullable(),
   startDate: date().nullable(),

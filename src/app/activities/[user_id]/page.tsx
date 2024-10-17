@@ -1,15 +1,17 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { trpc } from "../../../utils/trpc"
+import { trpc } from "../../../../utils/trpc"
 import "react-date-range/dist/styles.css"
 import "react-date-range/dist/theme/default.css"
-import ActivitiesTable from "./components/ActivitiesTable"
-import FilterActivity from "./components/FilterActivity"
+import { useParams } from "next/navigation"
+import ActivitiesTable from "../components/ActivitiesTable"
+import FilterActivity from "../components/FilterActivity"
 
 const ActivitiesPage = () => {
   const [search, setSearch] = useState("")
   const [dateVisibile, setDateVisible] = useState(false)
+  const { user_id } = useParams()
 
   var myDate = new Date()
   myDate.setHours(0, 0, 0, 0)
@@ -33,6 +35,7 @@ const ActivitiesPage = () => {
       {
         limit: 20,
         key: search,
+        user_id: user_id.toString(),
         startDate: dateSelected.selection.startDate || null,
         endDate: dateSelected.selection.endDate || null,
       },
